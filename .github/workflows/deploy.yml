@@ -1,12 +1,12 @@
-name: Build & Deploy SchichtID
+name: Deploy SchichtID Build
 
 on:
   push:
     branches:
-      - main  # triggers workflow on main branch
+      - main  # triggers workflow when you push to main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,21 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: npm install
-
-      # 4. Build project
-      - name: Build project
-        run: npm run build
-
-      # 5. Deploy contents of build folder to VPS
+      # 2. Deploy contents of build folder to VPS
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.8
         with:
