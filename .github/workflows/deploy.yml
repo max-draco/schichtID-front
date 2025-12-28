@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository (build repo)
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2️⃣ Deploy files to VPS using SCP
+      # 2️⃣ Deploy build contents to VPS via rsync
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -28,5 +28,8 @@ jobs:
             # Ensure destination exists
             mkdir -p /var/www/loginSchicht
 
-            # Copy all files from repo root to VPS folder
-            scp -r * ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/loginSchicht/
+            # Remove old files if needed
+            rm -rf /var/www/loginSchicht/*
+
+            # Sync all files from GitHub Actions workspace to VPS
+            rsync -avz --progress ./ /var/www/loginSchicht/
