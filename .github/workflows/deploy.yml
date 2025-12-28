@@ -10,26 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 2️⃣ Deploy build contents to VPS via rsync
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
-            # Ensure destination exists
-            mkdir -p /var/www/loginSchicht
+      - name: Install rsync
+        run: sudo apt-get update && sudo apt-get install -y rsync
 
-            # Remove old files if needed
-            rm -rf /var/www/loginSchicht/*
-
-            # Sync all files from GitHub Actions workspace to VPS
-            rsync -avz --progress ./ /var/www/loginSchicht/
+      - name: Deploy build to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          echo "$VPS_SSH_KEY" > key.pem
+          chmod 600 key.pem
+          rsync -avz -e "ssh -i key.pem -o StrictHostKeyChecking=no -p 22" ./ $VPS_USER@$VPS_HOST:/var/www/loginSchicht/
